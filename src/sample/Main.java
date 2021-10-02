@@ -3,8 +3,13 @@ package sample;
 import Objects.NodeGrid;
 import Objects.PathNode;
 import Objects.StateNode;
+import Objects.Wall;
 import Structure.NodeStructure;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -18,6 +23,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import utils.PositionCalculer;
 
 import java.awt.*;
@@ -28,11 +34,12 @@ public class Main extends Application{
     private Group root;
     private Pane pane;
     private NodeGrid grid;
+    private Timeline run;
     private int lineWidth = 6;
     private boolean startPlaced = false,
                     endPlaced = false,
                     startAlgo = false;
-    private int count;
+    private int xStart, yStart, xEnd ,yEnd;
 
     public void start(Stage primaryStage){
         root = new Group();
@@ -48,18 +55,20 @@ public class Main extends Application{
         pane.setPrefSize(scene.getWidth(),scene.getHeight());
         pane.setStyle("-fx-background-color: white;");
 
-        grid = new NodeGrid(14,14);
-
-        drawHorizontalLines();
-
-        drawVerticalLines();
+        grid = new NodeGrid(25,25);
+        xStart = 0;
+        yStart = 20;
+        xEnd = 2;
+        yEnd = 1;
+        grid.generatePresetGame(xStart,yStart,xEnd,yEnd);
 
         updateGUI();
 
         root.getChildren().add(pane);
 
+        play();
 
-
+        /*
         root.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -68,13 +77,13 @@ public class Main extends Application{
 
                 //Check if spawners are placed
                 if(!startPlaced){
-                    grid.addPathNode(x,y,new StateNode("start"));
+                    grid.createStartNode(x,y);
                     startPlaced = true;
                 }else {
-                    if(!endPlaced){
-                        grid.addPathNode(x,y,new StateNode("end"));
+                    if(!endPlaced && grid.checkStatusNodes(x,y)){ // Has to place end node else it won't play
+                        grid.createEndNode(x,y);
                         endPlaced = true;
-                    }else {
+                    }else if(startPlaced && endPlaced){
                         startAlgo = true;
                     }
                 }
@@ -94,6 +103,8 @@ public class Main extends Application{
 
             }
         });
+
+         */
     }
 
 
@@ -112,22 +123,48 @@ public class Main extends Application{
             }else {
                 rectangle.setFill(Color.YELLOW);
             }
+        }else if(node instanceof Wall){
+            rectangle.setFill(Color.DARKGREY);
         }else {
             rectangle.setFill(Color.LIGHTBLUE);
         }
 
         pane.getChildren().add(rectangle);
 
-        //If node has a gCost value, show its value
-        if(node.getgCost() !=0 ){
-            Text text = new Text(String.valueOf(node.getgCost()));
-            text.setLayoutX(rectangle.getLayoutX() + 20);
-            text.setLayoutY(rectangle.getLayoutY() + 20);
-            text.setFont(new Font(20));
-            text.setStroke(Color.BLACK);
-            text.setTextAlignment(TextAlignment.CENTER);
-            pane.getChildren().add(text);
+        if(grid.getGrid()[y][x] instanceof PathNode){
+            ((PathNode) grid.getGrid()[y][x]).setRectangle(rectangle);
         }
+
+        //If node has a gCost value, show its value
+        /*
+        if(node instanceof PathNode ){
+            //
+            Text gCost = new Text(String.valueOf(node.getgCost()));
+            gCost.setLayoutX(rectangle.getLayoutX() + 20);
+            gCost.setLayoutY(rectangle.getLayoutY() + 20);
+            gCost.setFont(new Font(20));
+            gCost.setStroke(Color.BLACK);
+            gCost.setTextAlignment(TextAlignment.CENTER);
+            pane.getChildren().add(gCost);
+            //
+            Text hCost = new Text(String.valueOf(node.gethCost()));
+            hCost.setLayoutX(rectangle.getLayoutX() + rectangle.getWidth() - 40);
+            hCost.setLayoutY(rectangle.getLayoutY() + 20);
+            hCost.setFont(new Font(20));
+            hCost.setStroke(Color.BLACK);
+            hCost.setTextAlignment(TextAlignment.CENTER);
+            pane.getChildren().add(hCost);
+
+            Text fCost = new Text(String.valueOf(node.getfCost()));
+            fCost.setLayoutX(rectangle.getLayoutX() + rectangle.getWidth()/2 - 10);
+            fCost.setLayoutY(rectangle.getLayoutY() + rectangle.getHeight()/2 - 10);
+            fCost.setFont(new Font(20));
+            fCost.setStroke(Color.BLACK);
+            fCost.setTextAlignment(TextAlignment.CENTER);
+            pane.getChildren().add(fCost);
+        }
+
+         */
         node.setGenerated(true);
 
     }
@@ -158,7 +195,6 @@ public class Main extends Application{
         }
     }
 
-
     /**
      * Update the GUI by getting informations from the NodeGrid
      */
@@ -178,14 +214,6 @@ public class Main extends Application{
         drawVerticalLines();
         drawHorizontalLines();
 
-        for(Node node: pane.getChildren()){
-            if(node instanceof Rectangle){
-                count++;
-            }
-        }
-        System.out.println(count);
-        count = 0;
-
     }
 
     public void updateGUI(){
@@ -196,23 +224,69 @@ public class Main extends Application{
                 }
             }
         }
-        drawVerticalLines();
         drawHorizontalLines();
+        drawVerticalLines();
     }
 
     public void moveFromNode(int x, int y){
-        if(checkAction(x,y)){
+        if(checkAction(x,y) && grid.getGrid()[y][x].isClickable()){
             grid.createCloseNodes(x,y);
-            PositionCalculer.calculateGcost(x,y,grid);
+            PositionCalculer.calculateGcost(x,y,grid.getStateNodePos("start"),grid);
+            PositionCalculer.calculateHcost(x,y,grid.getStateNodePos("end"),grid);
+            PositionCalculer.calculateFcost(x,y,grid);
+            changeRectangleColorOnClick(x,y);
+            grid.getGrid()[y][x].setClicked(true);
         }
+        updateGUI(x,y);
     }
 
     public boolean checkAction(int x, int y){
         boolean verif = false;
-        if(grid.isFilled(x,y) && !grid.getGrid()[y][x].isClicked()){
-            verif = true;
+        // Verify if x and y coordinates are on bounds.
+        if(x < grid.getRows() && y < grid.getCols()){
+            if(grid.isFilled(x,y) && !grid.getGrid()[y][x].isClicked()){
+                verif = true;
+            }
         }
         return verif;
+    }
+
+    /**
+     * Change a pathnode color when it gets clicked.
+     * @param x coordinate of the node
+     * @param y coordinate of the node
+     */
+    public void changeRectangleColorOnClick(int x,int y){
+        if(grid.getGrid()[y][x] instanceof PathNode){
+            ((PathNode) grid.getGrid()[y][x]).getRectangle().setFill(Color.RED);
+        }
+    }
+
+    public void start(){
+        moveFromNode(0,20);
+    }
+
+    /**
+     * Plays automatically the pathfinder.
+     * Using a timeline to animate the search.
+     */
+    public void play(){
+        start();
+        run = new Timeline(new KeyFrame(Duration.seconds(0.02), new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                PathNode nextNode = grid.chooseNextNode();
+                moveFromNode(nextNode.getX(),nextNode.getY());
+                boolean verif = grid.checkEnd(nextNode.getX(),nextNode.getY());
+                if(verif){
+                    run.stop();
+                }
+            }
+        }));
+        run.setCycleCount(Animation.INDEFINITE);
+        run.play();
+
+
     }
 
     public static void main(String[] args) {

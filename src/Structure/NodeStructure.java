@@ -1,11 +1,35 @@
 package Structure;
 
-import javafx.scene.layout.Pane;
-
 public abstract class NodeStructure {
     protected int gCost, hCost, fCost;
+    protected int x,y;
     protected boolean isClicked = false;
+    protected boolean isClickable;
     protected boolean isGenerated = false;
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public boolean isClickable() {
+        return isClickable;
+    }
+
+    public void setClickable(boolean clickable) {
+        isClickable = clickable;
+    }
 
     public boolean isClicked() {
         return isClicked;

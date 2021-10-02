@@ -7,6 +7,11 @@ public class StateNode extends NodeStructure {
 
     public StateNode(String name){
         this.name = name;
+        super.isClickable = true;
+    }
+    public StateNode(String name , boolean clickable){
+        this.name = name;
+        super.isClickable = clickable;
     }
 
     public String getName() {
