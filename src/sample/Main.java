@@ -5,6 +5,7 @@ import Objects.PathNode;
 import Objects.StateNode;
 import Objects.Wall;
 import Structure.NodeStructure;
+import Structure.SettingsPane;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -14,7 +15,9 @@ import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -32,7 +35,7 @@ import java.util.Arrays;
 public class Main extends Application{
     private Scene scene;
     private Group root;
-    private Pane pane;
+    private Pane pane, secondPane;
     private NodeGrid grid;
     private Timeline run;
     private int lineWidth = 6;
@@ -40,6 +43,8 @@ public class Main extends Application{
                     endPlaced = false,
                     startAlgo = false;
     private int xStart, yStart, xEnd ,yEnd;
+    private SettingsPane settingsPane;
+    private boolean isPlacingWalls = false;
 
     public void start(Stage primaryStage){
         root = new Group();
@@ -52,8 +57,14 @@ public class Main extends Application{
 
     public void initt(){
         pane = new Pane();
-        pane.setPrefSize(scene.getWidth(),scene.getHeight());
+        pane.setPrefSize(1000,720);
         pane.setStyle("-fx-background-color: white;");
+        settingsPane = new SettingsPane(this);
+
+        secondPane = new Pane();
+        secondPane.setPrefSize(scene.getWidth(),200);
+        secondPane.setLayoutX(0);
+        secondPane.setLayoutY(720);
 
         grid = new NodeGrid(25,25);
         xStart = 0;
@@ -65,15 +76,16 @@ public class Main extends Application{
         updateGUI();
 
         root.getChildren().add(pane);
+        root.getChildren().add(secondPane);
 
-        play();
+        //play();
 
-        /*
         root.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 int x = (int)event.getX()/(int)(scene.getWidth()/grid.getCols());
                 int y = (int)event.getY()/(int)(scene.getHeight()/grid.getRows());
+
 
                 //Check if spawners are placed
                 if(!startPlaced){
@@ -104,11 +116,13 @@ public class Main extends Application{
             }
         });
 
-         */
     }
 
+    public void setPlacingWalls(boolean placingWalls) {
+        isPlacingWalls = placingWalls;
+    }
 
-    public void drawRectangleOnPos(int x, int y,NodeStructure node){
+    public void drawRectangleOnPos(int x, int y, NodeStructure node){
         Rectangle rectangle = new Rectangle();
         rectangle.setWidth((scene.getWidth()/grid.getCols()));
         rectangle.setHeight((scene.getHeight()/grid.getRows()));
@@ -263,7 +277,7 @@ public class Main extends Application{
     }
 
     public void start(){
-        moveFromNode(0,20);
+        moveFromNode(xStart,yStart);
     }
 
     /**
@@ -285,8 +299,6 @@ public class Main extends Application{
         }));
         run.setCycleCount(Animation.INDEFINITE);
         run.play();
-
-
     }
 
     public static void main(String[] args) {
