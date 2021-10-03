@@ -1,10 +1,15 @@
 package Objects;
 
 import Structure.NodeStructure;
+import javafx.scene.paint.Color;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
 
 public class NodeGrid {
     private NodeStructure[][] grid;
     private int rows, cols;
+    private ArrayList<PathNode> chosenNodes = new ArrayList<>();
 
 
     public NodeGrid(int rows,int cols){
@@ -29,11 +34,11 @@ public class NodeGrid {
     }
 
     public void createStartNode(int x, int y){
-      addPathNode(x,y,new StateNode("start"));
+      addPathNode(x,y,new StateNode("start",x,y));
     }
 
     public void createEndNode(int x, int y){
-        addPathNode(x,y,new StateNode("end",false));
+        addPathNode(x,y,new StateNode("end",x,y,false));
     }
 
     public boolean checkStatusNodes(int x,int y){
@@ -45,8 +50,8 @@ public class NodeGrid {
     }
 
     public void generatePresetGame(int xStart, int yStart, int xEnd, int yEnd){
-        grid[yStart][xStart] = new StateNode("start");
-        grid[yEnd][xEnd] = new StateNode("end");
+        createStartNode(xStart,yStart);
+        createEndNode(xEnd,yEnd);
         generateWalls();
     }
 
@@ -83,6 +88,12 @@ public class NodeGrid {
 
     }
 
+    public void addWall(int x, int y){
+        if(y < rows && x < cols && grid[y][x] == null){
+            grid[y][x] = new Wall();
+        }
+    }
+
     public void fillGrid(){
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[i].length; j++) {
@@ -97,19 +108,20 @@ public class NodeGrid {
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 if(y+i >= 0 &&  y+i < rows && x+j >=0 && x+j < cols) {
-                    if (grid[y + i][x + j] != grid[y][x] && grid[y + i][x + j] == null) {
+                    if (grid[y + i][x + j] != grid[y][x] && grid[y + i][x + j] == null && checkCross(x,y,x+j,y+i)) {
                         grid[y + i][x + j] = new PathNode(y+i,x+j);
+
                     }
                 }
             }
         }
     }
 
-    public int[] getStateNodePos(String nameSN){
+    public NodeStructure getStateNodePos(String nameSN){
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[i].length; j++) {
                 if(grid[i][j] instanceof StateNode && ((StateNode) grid[i][j]).getName().equals(nameSN) ){
-                    return new int[]{i,j};
+                    return grid[i][j];
                 }
             }
         }
@@ -117,7 +129,7 @@ public class NodeGrid {
     }
 
     public void addPathNode(int x, int y,NodeStructure node){
-        if(grid[y][x] == null){
+        if(y < rows && x < cols && grid[y][x] == null ){
             grid[y][x] = node;
         }
     }
@@ -126,6 +138,28 @@ public class NodeGrid {
         boolean verif = false;
         if(grid[y][x] != null){
             verif = true;
+        }
+        return verif;
+    }
+
+    public boolean checkCross(int x, int y , int xToGo, int yToGo){
+        boolean verif = true;
+        if(xToGo-x < 0 && yToGo-y < 0 ){
+            if(grid[y][x-1] instanceof Wall && grid[y-1][x] instanceof Wall ){
+                verif = false;
+            }
+        }else if(xToGo-x > 0 && yToGo-y < 0 ){
+            if(grid[y-1][x] instanceof Wall && grid[y][x+1] instanceof Wall ){
+                verif = false;
+            }
+        }else if(xToGo-x < 0 && yToGo-y > 0 ){
+            if(grid[y][x-1] instanceof Wall && grid[y+1][x] instanceof Wall ){
+                verif = false;
+            }
+        }else if(xToGo-x > 0 && yToGo-y > 0 ){
+            if(grid[y][x+1] instanceof Wall && grid[y+1][x] instanceof Wall ){
+                verif = false;
+            }
         }
         return verif;
     }
@@ -140,5 +174,13 @@ public class NodeGrid {
 
     public int getCols() {
         return cols;
+    }
+
+    public ArrayList<PathNode> getChosenNodes() {
+        return chosenNodes;
+    }
+
+    public void setChosenNodes(ArrayList<PathNode> chosenNodes) {
+        this.chosenNodes = chosenNodes;
     }
 }

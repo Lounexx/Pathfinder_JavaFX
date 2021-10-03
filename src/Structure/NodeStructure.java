@@ -1,11 +1,15 @@
 package Structure;
 
+import javafx.scene.shape.Rectangle;
+
 public abstract class NodeStructure {
     protected int gCost, hCost, fCost;
     protected int x,y;
     protected boolean isClicked = false;
     protected boolean isClickable;
     protected boolean isGenerated = false;
+    protected boolean isOptimized = false;
+    protected Rectangle rectangle;
 
     public int getX() {
         return x;
@@ -69,5 +73,21 @@ public abstract class NodeStructure {
 
     public void setGenerated(boolean generated) {
         isGenerated = generated;
+    }
+
+    public boolean isOptimized() {
+        return isOptimized;
+    }
+
+    public void setOptimized(boolean optimized) {
+        isOptimized = optimized;
+    }
+
+    public Rectangle getRectangle() {
+        return rectangle;
+    }
+
+    public void setRectangle(Rectangle rectangle) {
+        this.rectangle = rectangle;
     }
 }

@@ -2,6 +2,7 @@ package utils;
 
 import Objects.NodeGrid;
 import Objects.PathNode;
+import Structure.NodeStructure;
 
 public class PositionCalculer {
 
@@ -11,9 +12,9 @@ public class PositionCalculer {
      * @param y is the y position of our clicked case
      * @param grid is the grid with every node
      */
-    public static void calculateGcost(int x, int y,int[] endCoords, NodeGrid grid){
-        int xEnd = endCoords[1];
-        int yEnd = endCoords[0];
+    public static void calculateGcost(int x, int y, NodeStructure node, NodeGrid grid){
+        int xEnd = node.getX();
+        int yEnd = node.getY();
         int xDif,yDif;
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
@@ -33,9 +34,9 @@ public class PositionCalculer {
         }
     }
 
-    public static void calculateHcost(int x, int y,int[] endCoords, NodeGrid grid){
-        int xEnd = endCoords[1];
-        int yEnd = endCoords[0];
+    public static void calculateHcost(int x, int y,NodeStructure node, NodeGrid grid){
+        int xEnd = node.getX();
+        int yEnd = node.getY();
         int xDif,yDif;
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
