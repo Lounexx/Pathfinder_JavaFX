@@ -59,7 +59,7 @@ public class Main extends Application{
 
     public void initt(){
         pane = new Pane();
-        pane.setPrefSize(1000,720);
+        pane.setPrefSize(scene.getWidth(),scene.getHeight());
         pane.setStyle("-fx-background-color: white;");
         settingsPane = new SettingsPane(this);
 
@@ -74,7 +74,6 @@ public class Main extends Application{
 
         root.getChildren().add(pane);
         root.getChildren().add(secondPane);
-
 
         root.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
@@ -114,7 +113,6 @@ public class Main extends Application{
 
     }
 
-
     public boolean isStartPlaced() {
         return startPlaced;
     }
@@ -131,11 +129,21 @@ public class Main extends Application{
         isPlacingState = placingState;
     }
 
+    /**
+     * Delete everything from the GUI except lines.
+     */
     public void deleteAll(){
         pane.getChildren().removeIf(node -> node instanceof Rectangle);
         pane.getChildren().removeIf(node -> node instanceof Text);
     }
 
+    /**
+     * Delete only the needed information to restart a pathfinder without resetting the table.
+     * Removes pathnodes and statenodes.
+     * Removes text from pathnodes.
+     * Keep all the walls.
+     * Does not delete lines
+     */
     public void deleteOnlyPath(){
         for(NodeStructure[] nodeStructure : grid.getGrid()){
             for(NodeStructure node : nodeStructure){
@@ -148,6 +156,12 @@ public class Main extends Application{
         grid.setChosenNodes(new ArrayList<>());
     }
 
+    /**
+     * Draw a rectangle following the node type and it's position
+     * @param x coordinate of the node
+     * @param y coordinate of the node
+     * @param node is the node we want to display
+     */
     public void drawRectangleOnPos(int x, int y, NodeStructure node){
         Rectangle rectangle = new Rectangle();
         rectangle.setWidth((scene.getWidth()/grid.getCols()));
@@ -177,7 +191,8 @@ public class Main extends Application{
         if(isShowingParameters){
             //If node has a gCost value, show its value
             if(node instanceof PathNode ){
-                //
+
+                // Setup gCost number in PathNode
                 Text gCost = new Text(String.valueOf(node.getgCost()));
                 gCost.setLayoutX(rectangle.getLayoutX() + 20);
                 gCost.setLayoutY(rectangle.getLayoutY() + 20);
@@ -186,7 +201,8 @@ public class Main extends Application{
                 gCost.setTextAlignment(TextAlignment.CENTER);
                 pane.getChildren().add(gCost);
                 ((PathNode) node).setTextGcost(gCost);
-                //
+
+                //Setup hCost number in PathNode
                 Text hCost = new Text(String.valueOf(node.gethCost()));
                 hCost.setLayoutX(rectangle.getLayoutX() + rectangle.getWidth() - 40);
                 hCost.setLayoutY(rectangle.getLayoutY() + 20);
@@ -195,6 +211,7 @@ public class Main extends Application{
                 hCost.setTextAlignment(TextAlignment.CENTER);
                 pane.getChildren().add(hCost);
 
+                //Setup fCost number in PathNode
                 Text fCost = new Text(String.valueOf(node.getfCost()));
                 fCost.setLayoutX(rectangle.getLayoutX() + rectangle.getWidth()/2 - 10);
                 fCost.setLayoutY(rectangle.getLayoutY() + rectangle.getHeight()/2);
@@ -205,11 +222,12 @@ public class Main extends Application{
                 ((PathNode) node).setTextFcost(fCost);
             }
         }
-
         node.setGenerated(true);
-
     }
 
+    /**
+     * Draw the vertical lines of the table
+     */
     public void drawVerticalLines(){
         for (int j = 1; j <= grid.getCols(); j++) {
             Line line = new Line();
@@ -223,6 +241,9 @@ public class Main extends Application{
         }
     }
 
+    /**
+     * Draw the horizontal lines of the table
+     */
     public void drawHorizontalLines(){
         for (int i = 1; i <= grid.getRows(); i++) {
             Line line = new Line();
@@ -237,7 +258,9 @@ public class Main extends Application{
     }
 
     /**
-     * Update the GUI by getting informations from the NodeGrid
+     * Updates the GUI on a defined range by the x and y parameters
+     * @param x position where to update.
+     * @param y position where to update.
      */
     public void updateGUI(int x, int y){
         pane.getChildren().removeIf(node -> node instanceof Line);
@@ -257,6 +280,9 @@ public class Main extends Application{
 
     }
 
+    /**
+     * Updating the GUI for the entire table
+     */
     public void updateGUI(){
         for (int i = 0; i < grid.getRows(); i++) {
             for (int j = 0; j < grid.getCols(); j++) {
@@ -269,6 +295,11 @@ public class Main extends Application{
         drawVerticalLines();
     }
 
+    /**
+     * Jumping to the node where we clicked. Changing the node state to clicked.
+     * @param x position of the x mouse click event.
+     * @param y position of the y mouse click event.
+     */
     public void moveFromNode(int x, int y){
         if(checkAction(x,y) && grid.getGrid()[y][x].isClickable()){
             grid.createCloseNodes(x,y);
@@ -282,6 +313,13 @@ public class Main extends Application{
         updateGUI(x,y);
     }
 
+    /**
+     * Checks if the user action is correct.
+     * Prevents from getting out of bounds of the table.
+     * @param x position of the x mouse click event.
+     * @param y position of the y mouse click event.
+     * @return if the action is correct or not
+     */
     public boolean checkAction(int x, int y){
         boolean verif = false;
         // Verify if x and y coordinates are on bounds.
@@ -293,11 +331,17 @@ public class Main extends Application{
         return verif;
     }
 
+    /**
+     *
+     * @param x
+     * @param y
+     */
     public void changeRectangleColorOnClick(int x,int y){
         if(grid.getGrid()[y][x] instanceof PathNode){
-            ((PathNode) grid.getGrid()[y][x]).getRectangle().setFill(Color.RED);
+            grid.getGrid()[y][x].getRectangle().setFill(Color.RED);
         }
     }
+
 
     public void start(){
         moveFromNode(xStart,yStart);
