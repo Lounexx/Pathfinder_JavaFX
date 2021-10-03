@@ -75,7 +75,6 @@ public class Main extends Application{
         root.getChildren().add(pane);
         root.getChildren().add(secondPane);
 
-        //play();
 
         root.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
