@@ -1,9 +1,8 @@
 package Objects;
 
 import Structure.NodeStructure;
-import javafx.scene.paint.Color;
 
-import java.nio.file.Path;
+
 import java.util.ArrayList;
 
 public class NodeGrid {
@@ -18,12 +17,12 @@ public class NodeGrid {
         grid = new NodeStructure[this.rows][this.cols];
     }
 
-    public boolean checkEnd(int x,int y){
+    public boolean checkFinish(int x, int y,String nameStateNode){
         boolean verif = false;
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 if(y+i >= 0 &&  y+i < rows && x+j >=0 && x+j < cols){
-                    if(grid[y+i][x+j] instanceof StateNode && ((StateNode) grid[y+i][x+j]).getName().equals("end")){
+                    if(grid[y+i][x+j] instanceof StateNode && ((StateNode) grid[y+i][x+j]).getName().equals(nameStateNode)){
                         verif = true;
                         break;
                     }
@@ -110,7 +109,33 @@ public class NodeGrid {
                 if(y+i >= 0 &&  y+i < rows && x+j >=0 && x+j < cols) {
                     if (grid[y + i][x + j] != grid[y][x] && grid[y + i][x + j] == null && checkCross(x,y,x+j,y+i)) {
                         grid[y + i][x + j] = new PathNode(y+i,x+j);
+                        ((PathNode) grid[y + i][x + j]).setParent(grid[y][x]);
+                        updateClick(x,y);
+                    }
+                }
+            }
+        }
+    }
 
+    public void updateClick(int x,int y){
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if(y+i >= 0 &&  y+i < rows && x+j >=0 && x+j < cols) {
+                    if (grid[y + i][x + j] instanceof PathNode && grid[y][x].getgCost() < ((PathNode) grid[y + i][x + j]).getParent().getgCost() && !grid[y + i][x + j].isClicked()) {
+                        ((PathNode) grid[y + i][x + j]).setParent(grid[y][x]);
+                        int xdif = Math.abs(x+j);
+                        int ydif = Math.abs(y+i);
+                        if(xdif == 1 && ydif == 1){
+                            grid[y + i][x + j].setgCost(((PathNode) grid[y + i][x + j]).getParent().getgCost() + 14);
+                        }else {
+                            grid[y + i][x + j].setgCost(((PathNode) grid[y + i][x + j]).getParent().getgCost() + 10);
+                        }
+                        grid[y + i][x + j].setfCost(grid[y + i][x + j].getgCost() + grid[y + i][x + j].gethCost());
+
+                        try{
+                            ((PathNode) grid[y + i][x + j]).getTextGcost().setText(String.valueOf(grid[y + i][x + j].getgCost()));
+                            ((PathNode) grid[y + i][x + j]).getTextFcost().setText(String.valueOf(grid[y + i][x + j].getfCost()));
+                        }catch (Exception ignored){}
                     }
                 }
             }

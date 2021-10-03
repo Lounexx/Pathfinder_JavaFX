@@ -1,38 +1,53 @@
 package utils;
 
-import Objects.PathNode;
-import Structure.NodeStructure;
-import javafx.scene.paint.Color;
 
-import java.util.ArrayList;
+import Objects.NodeGrid;
+import Objects.PathNode;
+import Objects.StateNode;
+
 
 public class OptimizerPath {
 
-    public static void optimizePath(ArrayList<PathNode> chosenNodes){
-        ArrayList<PathNode> nodesToRemove = new ArrayList<>();
-        int index;
-        int gCost = chosenNodes.get(0).getgCost(),hCost = chosenNodes.get(0).gethCost();
-        for(PathNode pathNode: chosenNodes){
-            index = chosenNodes.indexOf(pathNode)+1;
-            if(index < chosenNodes.size()){
-                if(chosenNodes.get(index).getgCost() < gCost && chosenNodes.get(index).gethCost() > hCost){
-                    nodesToRemove.add(chosenNodes.get(index));
-                }else if(chosenNodes.get(index).getfCost() == pathNode.getfCost() && chosenNodes.get(index).getgCost() > pathNode.getgCost() && chosenNodes.get(index).gethCost() < pathNode.gethCost()){
-                    nodesToRemove.add(pathNode);
-                }
-                else{
-                    gCost = chosenNodes.get(index).getgCost();
-                    hCost = chosenNodes.get(index).gethCost();
+
+    public static PathNode getStarterNode(NodeGrid grid){
+        StateNode endNode = (StateNode) grid.getStateNodePos("end");
+        PathNode pathNode = null;
+        int x = endNode.getX();
+        int y = endNode.getY();
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if(y+i >= 0 &&  y+i < grid.getRows() && x+j >=0 && x+j < grid.getCols()){
+                    if(grid.getGrid()[y+i][x+j] instanceof PathNode && grid.getGrid()[y+i][x+j].isClicked()){
+                        pathNode = (PathNode) grid.getGrid()[y+i][x+j];
+                    }
                 }
             }
-
         }
-        for (PathNode node:nodesToRemove){
-            System.out.println(node.getfCost());
-        }
-        chosenNodes.removeAll(nodesToRemove);
-        for(PathNode node:chosenNodes){
-            node.getRectangle().setFill(Color.LIGHTCYAN);
-        }
+        return pathNode;
     }
+
+    public static boolean finished(int x, int y, NodeGrid grid){
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                if(y+i >= 0 &&  y+i < grid.getRows() && x+j >=0 && x+j < grid.getCols()){
+                    if(grid.getGrid()[y+i][x+j] instanceof StateNode && ((StateNode) grid.getGrid()[y+i][x+j]).getName().equals("start")){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static PathNode getNextNode(PathNode node){
+        PathNode parent;
+        try {
+            parent = (PathNode) node.getParent();
+        }catch (Exception e){
+            parent = null;
+        }
+
+        return parent;
+    }
+
 }

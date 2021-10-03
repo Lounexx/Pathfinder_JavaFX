@@ -37,12 +37,16 @@ public class Main extends Application{
     private NodeGrid grid;
     private Timeline run,optimized;
     private int lineWidth = 6;
-    private boolean startPlaced = false,
-                    endPlaced = false;
+
     private int xStart, yStart, xEnd ,yEnd;
     private SettingsPane settingsPane;
+
+    private boolean startPlaced = false;
+    private boolean endPlaced = false;
     private boolean isPlacingWalls = false;
     private boolean isPlacingState = false;
+
+    private boolean isShowingParameters = false;
 
     public void start(Stage primaryStage){
         root = new Group();
@@ -64,7 +68,7 @@ public class Main extends Application{
         secondPane.setLayoutX(0);
         secondPane.setLayoutY(720);
 
-        grid = new NodeGrid(5,5);
+        grid = new NodeGrid(6,11);
 
         updateGUI();
 
@@ -103,6 +107,7 @@ public class Main extends Application{
                 }
                 if(startPlaced && endPlaced){
                     moveFromNode(x,y);
+
                 }
             }
 
@@ -167,36 +172,39 @@ public class Main extends Application{
 
         pane.getChildren().add(rectangle);
 
-        if(grid.getGrid()[y][x] instanceof PathNode || grid.getGrid()[y][x] instanceof StateNode){
-             grid.getGrid()[y][x].setRectangle(rectangle);
+        if(node instanceof PathNode || node instanceof StateNode){
+             node.setRectangle(rectangle);
         }
+        if(isShowingParameters){
+            //If node has a gCost value, show its value
+            if(node instanceof PathNode ){
+                //
+                Text gCost = new Text(String.valueOf(node.getgCost()));
+                gCost.setLayoutX(rectangle.getLayoutX() + 20);
+                gCost.setLayoutY(rectangle.getLayoutY() + 20);
+                gCost.setFont(new Font(12));
+                gCost.setStroke(Color.BLACK);
+                gCost.setTextAlignment(TextAlignment.CENTER);
+                pane.getChildren().add(gCost);
+                ((PathNode) node).setTextGcost(gCost);
+                //
+                Text hCost = new Text(String.valueOf(node.gethCost()));
+                hCost.setLayoutX(rectangle.getLayoutX() + rectangle.getWidth() - 40);
+                hCost.setLayoutY(rectangle.getLayoutY() + 20);
+                hCost.setFont(new Font(12));
+                hCost.setStroke(Color.BLACK);
+                hCost.setTextAlignment(TextAlignment.CENTER);
+                pane.getChildren().add(hCost);
 
-        //If node has a gCost value, show its value
-        if(node instanceof PathNode ){
-            //
-            Text gCost = new Text(String.valueOf(node.getgCost()));
-            gCost.setLayoutX(rectangle.getLayoutX() + 20);
-            gCost.setLayoutY(rectangle.getLayoutY() + 20);
-            gCost.setFont(new Font(12));
-            gCost.setStroke(Color.BLACK);
-            gCost.setTextAlignment(TextAlignment.CENTER);
-            pane.getChildren().add(gCost);
-            //
-            Text hCost = new Text(String.valueOf(node.gethCost()));
-            hCost.setLayoutX(rectangle.getLayoutX() + rectangle.getWidth() - 40);
-            hCost.setLayoutY(rectangle.getLayoutY() + 20);
-            hCost.setFont(new Font(12));
-            hCost.setStroke(Color.BLACK);
-            hCost.setTextAlignment(TextAlignment.CENTER);
-            pane.getChildren().add(hCost);
-
-            Text fCost = new Text(String.valueOf(node.getfCost()));
-            fCost.setLayoutX(rectangle.getLayoutX() + rectangle.getWidth()/2 - 10);
-            fCost.setLayoutY(rectangle.getLayoutY() + rectangle.getHeight()/2);
-            fCost.setFont(new Font(16));
-            fCost.setStroke(Color.BLACK);
-            fCost.setTextAlignment(TextAlignment.CENTER);
-            pane.getChildren().add(fCost);
+                Text fCost = new Text(String.valueOf(node.getfCost()));
+                fCost.setLayoutX(rectangle.getLayoutX() + rectangle.getWidth()/2 - 10);
+                fCost.setLayoutY(rectangle.getLayoutY() + rectangle.getHeight()/2);
+                fCost.setFont(new Font(16));
+                fCost.setStroke(Color.BLACK);
+                fCost.setTextAlignment(TextAlignment.CENTER);
+                pane.getChildren().add(fCost);
+                ((PathNode) node).setTextFcost(fCost);
+            }
         }
 
         node.setGenerated(true);
@@ -265,11 +273,12 @@ public class Main extends Application{
     public void moveFromNode(int x, int y){
         if(checkAction(x,y) && grid.getGrid()[y][x].isClickable()){
             grid.createCloseNodes(x,y);
-            PositionCalculer.calculateGcost(x,y,grid.getStateNodePos("start"),grid);
+            PositionCalculer.calculateGcost(x,y,grid);
             PositionCalculer.calculateHcost(x,y,grid.getStateNodePos("end"),grid);
             PositionCalculer.calculateFcost(x,y,grid);
             changeRectangleColorOnClick(x,y);
             grid.getGrid()[y][x].setClicked(true);
+
         }
         updateGUI(x,y);
     }
@@ -277,7 +286,7 @@ public class Main extends Application{
     public boolean checkAction(int x, int y){
         boolean verif = false;
         // Verify if x and y coordinates are on bounds.
-        if(x < grid.getRows() && y < grid.getCols()){
+        if(x < grid.getCols() && y < grid.getRows()){
             if(grid.isFilled(x,y) && !grid.getGrid()[y][x].isClicked()){
                 verif = true;
             }
@@ -285,11 +294,6 @@ public class Main extends Application{
         return verif;
     }
 
-    /**
-     * Change a pathnode color when it gets clicked.
-     * @param x coordinate of the node
-     * @param y coordinate of the node
-     */
     public void changeRectangleColorOnClick(int x,int y){
         if(grid.getGrid()[y][x] instanceof PathNode){
             ((PathNode) grid.getGrid()[y][x]).getRectangle().setFill(Color.RED);
@@ -306,20 +310,35 @@ public class Main extends Application{
      */
     public void play(){
         start();
-        run = new Timeline(new KeyFrame(Duration.seconds(0.05), new EventHandler<ActionEvent>() {
+        run = new Timeline(new KeyFrame(Duration.seconds(0.01), new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 PathNode nextNode = grid.chooseNextNode();
-                boolean verif = false;
+                final boolean[] verif = {false};
                 try {
                     moveFromNode(nextNode.getX(),nextNode.getY());
                     grid.getChosenNodes().add(nextNode);
-                    verif = grid.checkEnd(nextNode.getX(),nextNode.getY());
+                    verif[0] = grid.checkFinish(nextNode.getX(),nextNode.getY(),"end");
                 }catch (Exception E){
                     run.stop();
                 }
-                if(verif){
+                if(verif[0]){
                     run.stop();
+                    verif[0] = false;
+                    final PathNode[] node = {OptimizerPath.getStarterNode(grid)};
+                    optimized = new Timeline(new KeyFrame(Duration.seconds(0.1), new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            node[0].getRectangle().setFill(Color.LIGHTCORAL);
+                            verif[0] = OptimizerPath.finished(node[0].getX(), node[0].getY(),grid);
+                            node[0] = OptimizerPath.getNextNode(node[0]);
+                            if(verif[0]){
+                                optimized.stop();
+                            }
+                        }
+                    }));
+                    optimized.setCycleCount(Animation.INDEFINITE);
+                    optimized.play();
                 }
             }
         }));
