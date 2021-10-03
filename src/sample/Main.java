@@ -68,7 +68,7 @@ public class Main extends Application{
         secondPane.setLayoutX(0);
         secondPane.setLayoutY(720);
 
-        grid = new NodeGrid(6,11);
+        grid = new NodeGrid(15,15);
 
         updateGUI();
 
@@ -165,7 +165,7 @@ public class Main extends Application{
                 rectangle.setFill(Color.YELLOW);
             }
         }else if(node instanceof Wall){
-            rectangle.setFill(Color.DARKGREY);
+            rectangle.setFill(Color.BLACK);
         }else {
             rectangle.setFill(Color.LIGHTBLUE);
         }
@@ -310,7 +310,7 @@ public class Main extends Application{
      */
     public void play(){
         start();
-        run = new Timeline(new KeyFrame(Duration.seconds(0.01), new EventHandler<ActionEvent>() {
+        run = new Timeline(new KeyFrame(Duration.seconds(0.05), new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 PathNode nextNode = grid.chooseNextNode();
@@ -321,6 +321,13 @@ public class Main extends Application{
                     verif[0] = grid.checkFinish(nextNode.getX(),nextNode.getY(),"end");
                 }catch (Exception E){
                     run.stop();
+                    for(NodeStructure[] node : grid.getGrid()){
+                        for (NodeStructure aNode:node) {
+                            if(aNode instanceof PathNode){
+                                aNode.getRectangle().setFill(Color.DARKGREY);
+                            }
+                        }
+                    }
                 }
                 if(verif[0]){
                     run.stop();
@@ -329,7 +336,7 @@ public class Main extends Application{
                     optimized = new Timeline(new KeyFrame(Duration.seconds(0.1), new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent event) {
-                            node[0].getRectangle().setFill(Color.LIGHTCORAL);
+                            OptimizerPath.changeColor(node[0],Color.FUCHSIA);
                             verif[0] = OptimizerPath.finished(node[0].getX(), node[0].getY(),grid);
                             node[0] = OptimizerPath.getNextNode(node[0]);
                             if(verif[0]){

@@ -4,6 +4,7 @@ package utils;
 import Objects.NodeGrid;
 import Objects.PathNode;
 import Objects.StateNode;
+import javafx.scene.paint.Paint;
 
 
 public class OptimizerPath {
@@ -48,6 +49,10 @@ public class OptimizerPath {
         }
 
         return parent;
+    }
+
+    public static void changeColor(PathNode node, Paint color){
+        node.getRectangle().setFill(color);
     }
 
 }
