@@ -37,10 +37,8 @@ public class Main extends Application{
     private NodeGrid grid;
     private Timeline run,optimized;
     private int lineWidth = 6;
-
     private int xStart, yStart, xEnd ,yEnd;
     private SettingsPane settingsPane;
-
     private boolean startPlaced = false;
     private boolean endPlaced = false;
     private boolean isPlacingWalls = false;
