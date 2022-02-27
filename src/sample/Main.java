@@ -451,6 +451,8 @@ public class Main extends Application{
 
         startPlaced = false;
 
+        hasStarted = false;
+
         endPlaced = false;
 
         updateGUI();
