@@ -20,8 +20,6 @@ public class PositionCalculer {
                     if(grid.getGrid()[y+i][x+j] != grid.getGrid()[y][x] && grid.getGrid()[y+i][x+j] instanceof PathNode && !(grid.getGrid()[y+i][x+j]).isGenerated()){
                         xDif = Math.abs(x+j-x);
                         yDif = Math.abs(y+i-y);
-                        System.out.println(xDif);
-                        System.out.println(yDif);
                         if(xDif == 1 && yDif == 1){
                             grid.getGrid()[y + i][x + j].setgCost(((PathNode) grid.getGrid()[y + i][x + j]).getParent().getgCost() + 14);
                         }else {
@@ -32,6 +30,7 @@ public class PositionCalculer {
             }
         }
     }
+
 
     public static void calculateHcost(int x, int y,NodeStructure node, NodeGrid grid){
         int xEnd = node.getX();
@@ -55,6 +54,7 @@ public class PositionCalculer {
             }
         }
     }
+
 
     public static void calculateFcost(int x, int y, NodeGrid grid){
         for (int i = -1; i <= 1; i++) {

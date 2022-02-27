@@ -1,14 +1,22 @@
 package Structure;
 
+
 import javafx.scene.shape.Rectangle;
 
 public abstract class NodeStructure {
+
     protected int gCost, hCost, fCost;
+
     protected int x,y;
+
     protected boolean isClicked = false;
+
     protected boolean isClickable;
+
     protected boolean isGenerated = false;
+
     protected boolean isOptimized = false;
+
     protected Rectangle rectangle;
 
     public int getX() {

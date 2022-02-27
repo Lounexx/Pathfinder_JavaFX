@@ -17,6 +17,7 @@ public class NodeGrid {
         grid = new NodeStructure[this.rows][this.cols];
     }
 
+
     public boolean checkFinish(int x, int y,String nameStateNode){
         boolean verif = false;
         for (int i = -1; i <= 1; i++) {
@@ -32,6 +33,7 @@ public class NodeGrid {
         return verif;
     }
 
+
     public void createStartNode(int x, int y){
       addPathNode(x,y,new StateNode("start",x,y));
     }
@@ -39,6 +41,7 @@ public class NodeGrid {
     public void createEndNode(int x, int y){
         addPathNode(x,y,new StateNode("end",x,y,false));
     }
+
 
     public boolean checkStatusNodes(int x,int y){
         boolean verif = true;
@@ -48,11 +51,13 @@ public class NodeGrid {
         return verif;
     }
 
+
     public void generatePresetGame(int xStart, int yStart, int xEnd, int yEnd){
         createStartNode(xStart,yStart);
         createEndNode(xEnd,yEnd);
         generateWalls();
     }
+
 
     public PathNode chooseNextNode(){
         int lowestValue = 10000;
@@ -69,6 +74,7 @@ public class NodeGrid {
         }
         return pathNodeToChoose;
     }
+
 
     public void generateWalls(){
         grid[2][1] = new Wall();
@@ -87,11 +93,13 @@ public class NodeGrid {
 
     }
 
+
     public void addWall(int x, int y){
         if(y < rows && x < cols && grid[y][x] == null){
             grid[y][x] = new Wall();
         }
     }
+
 
     public void fillGrid(){
         for (int i = 0; i < grid.length; i++) {
@@ -102,6 +110,7 @@ public class NodeGrid {
             }
         }
     }
+
 
     public void createCloseNodes(int x , int y){
         for (int i = -1; i <= 1; i++) {
@@ -116,6 +125,7 @@ public class NodeGrid {
             }
         }
     }
+
 
     public void updateClick(int x,int y){
         for (int i = -1; i <= 1; i++) {
@@ -142,6 +152,7 @@ public class NodeGrid {
         }
     }
 
+
     public NodeStructure getStateNodePos(String nameSN){
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[i].length; j++) {
@@ -152,6 +163,7 @@ public class NodeGrid {
         }
         return null;
     }
+
 
     public void addPathNode(int x, int y,NodeStructure node){
         if(y < rows && x < cols && grid[y][x] == null ){
@@ -189,6 +201,7 @@ public class NodeGrid {
         return verif;
     }
 
+
     public NodeStructure[][] getGrid() {
         return grid;
     }
@@ -204,6 +217,7 @@ public class NodeGrid {
     public ArrayList<PathNode> getChosenNodes() {
         return chosenNodes;
     }
+
 
     public void setChosenNodes(ArrayList<PathNode> chosenNodes) {
         this.chosenNodes = chosenNodes;

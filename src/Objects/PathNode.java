@@ -3,6 +3,8 @@ package Objects;
 import Structure.NodeStructure;
 import javafx.scene.text.Text;
 
+import java.awt.*;
+
 
 public class PathNode extends NodeStructure {
     private NodeStructure parent;
@@ -26,9 +28,11 @@ public class PathNode extends NodeStructure {
         return textGcost;
     }
 
+
     public void setTextGcost(Text textGcost) {
         this.textGcost = textGcost;
     }
+
 
     public Text getTextFcost() {
         return textFcost;

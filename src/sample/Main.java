@@ -24,6 +24,8 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import utils.MapGenerator;
+import utils.MapGeneratorExtractor;
 import utils.OptimizerPath;
 import utils.PositionCalculer;
 
@@ -43,6 +45,8 @@ public class Main extends Application{
     private boolean endPlaced = false;
     private boolean isPlacingWalls = false;
     private boolean isPlacingState = false;
+    private boolean hasFailed = false;
+    public boolean hasStarted = false;
 
     private boolean isShowingParameters = false;
 
@@ -66,8 +70,9 @@ public class Main extends Application{
         secondPane.setLayoutX(0);
         secondPane.setLayoutY(720);
 
-        grid = new NodeGrid(15,15);
+        grid = new NodeGrid(30,30);
 
+        initRandomMaze();
         updateGUI();
 
         root.getChildren().add(pane);
@@ -111,17 +116,21 @@ public class Main extends Application{
 
     }
 
+
     public boolean isStartPlaced() {
         return startPlaced;
     }
+
 
     public boolean isEndPlaced() {
         return endPlaced;
     }
 
+
     public void setPlacingWalls(boolean placingWalls) {
         isPlacingWalls = placingWalls;
     }
+
 
     public void setPlacingState(boolean placingState) {
         isPlacingState = placingState;
@@ -311,6 +320,7 @@ public class Main extends Application{
         updateGUI(x,y);
     }
 
+
     /**
      * Checks if the user action is correct.
      * Prevents from getting out of bounds of the table.
@@ -328,6 +338,7 @@ public class Main extends Application{
         }
         return verif;
     }
+
 
     /**
      *
@@ -351,7 +362,8 @@ public class Main extends Application{
      */
     public void play(){
         start();
-        run = new Timeline(new KeyFrame(Duration.seconds(0.05), new EventHandler<ActionEvent>() {
+        hasStarted = true;
+        run = new Timeline(new KeyFrame(Duration.seconds(0.005), new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 PathNode nextNode = grid.chooseNextNode();
@@ -369,6 +381,10 @@ public class Main extends Application{
                             }
                         }
                     }
+                    hasFailed = true;
+                    if(hasFailed){
+                        restartRandomMaze();
+                    }
                 }
                 if(verif[0]){
                     run.stop();
@@ -382,6 +398,8 @@ public class Main extends Application{
                             node[0] = OptimizerPath.getNextNode(node[0]);
                             if(verif[0]){
                                 optimized.stop();
+                                int[][] result = MapGeneratorExtractor.extractMazeSetup(grid.getGrid());
+                                MapGeneratorExtractor.displayGeneratedMaze(result);
                             }
                         }
                     }));
@@ -394,25 +412,31 @@ public class Main extends Application{
         run.play();
     }
 
+
     public void restart(){
+        hasStarted = false;
         if(run != null){
            run.stop();
         }
-
+        if(optimized != null){
+            optimized.stop();
+        }
         deleteAll();
-
         grid = new NodeGrid(grid.getRows(),grid.getCols());
-
         startPlaced = false;
-
         endPlaced = false;
-
         updateGUI();
+        hasFailed = false;
     }
+
 
     public void restartOnlyPath(){
         if(run != null){
             run.stop();
+        }
+
+        if(optimized != null){
+            optimized.stop();
         }
 
         deleteOnlyPath();
@@ -432,10 +456,38 @@ public class Main extends Application{
         updateGUI();
     }
 
+
     public void addWall(int x, int y){
         grid.addWall(x,y);
         updateGUI(x,y);
     }
+
+
+    public void initRandomMaze(){
+        grid.createStartNode(0,0);
+        startPlaced = true;
+        xStart = 0;
+        yStart = 0;
+        updateGUI(0,0);
+
+        grid.createEndNode(grid.getRows()-1,grid.getCols()-1);
+        endPlaced = true;
+        xEnd = grid.getRows()-1;
+        yEnd = grid.getCols()-1;
+        updateGUI(grid.getRows()-1,grid.getCols()-1);
+
+
+        MapGenerator.generateRandomWalls(grid);
+        updateGUI();
+        play();
+    }
+
+
+    public void restartRandomMaze(){
+        restart();
+        initRandomMaze();
+    }
+
 
     public static void main(String[] args) {
         launch(args);

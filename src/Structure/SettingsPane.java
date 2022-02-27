@@ -53,16 +53,17 @@ public class SettingsPane {
         play.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                toggleButtonsOff(play);
+                if(!main.hasStarted){
+                    toggleButtonsOff(play);
 
-                main.setPlacingWalls(addWalls.isSelected());
+                    main.setPlacingWalls(addWalls.isSelected());
 
-                main.setPlacingState(setupState.isSelected());
+                    main.setPlacingState(setupState.isSelected());
 
-                if(main.isEndPlaced() && main.isStartPlaced()){
-                    main.play();
+                    if(main.isEndPlaced() && main.isStartPlaced()){
+                        main.play();
+                    }
                 }
-
             }
         });
 
