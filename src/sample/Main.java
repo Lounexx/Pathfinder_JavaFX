@@ -48,7 +48,7 @@ public class Main extends Application{
     private boolean hasFailed = false;
     public boolean hasStarted = false;
 
-    private boolean isShowingParameters = false;
+    private boolean isShowingParameters = true;
 
     public void start(Stage primaryStage){
         root = new Group();
@@ -70,7 +70,7 @@ public class Main extends Application{
         secondPane.setLayoutX(0);
         secondPane.setLayoutY(720);
 
-        grid = new NodeGrid(30,30);
+        grid = new NodeGrid(15,15);
 
         initRandomMaze();
         updateGUI();
@@ -188,22 +188,24 @@ public class Main extends Application{
             rectangle.setFill(Color.BLACK);
         }else {
             rectangle.setFill(Color.LIGHTBLUE);
+
         }
 
         pane.getChildren().add(rectangle);
 
         if(node instanceof PathNode || node instanceof StateNode){
              node.setRectangle(rectangle);
+
         }
+
         if(isShowingParameters){
             //If node has a gCost value, show its value
-            if(node instanceof PathNode ){
-
+            if(node instanceof PathNode && !node.isGenerated()){
                 // Setup gCost number in PathNode
                 Text gCost = new Text(String.valueOf(node.getgCost()));
-                gCost.setLayoutX(rectangle.getLayoutX() + 20);
+                gCost.setLayoutX(rectangle.getLayoutX() + 10);
                 gCost.setLayoutY(rectangle.getLayoutY() + 20);
-                gCost.setFont(new Font(12));
+                gCost.setFont(new Font(11));
                 gCost.setStroke(Color.BLACK);
                 gCost.setTextAlignment(TextAlignment.CENTER);
                 pane.getChildren().add(gCost);
@@ -211,9 +213,9 @@ public class Main extends Application{
 
                 //Setup hCost number in PathNode
                 Text hCost = new Text(String.valueOf(node.gethCost()));
-                hCost.setLayoutX(rectangle.getLayoutX() + rectangle.getWidth() - 40);
+                hCost.setLayoutX(rectangle.getLayoutX() + rectangle.getWidth() - 30);
                 hCost.setLayoutY(rectangle.getLayoutY() + 20);
-                hCost.setFont(new Font(12));
+                hCost.setFont(new Font(11));
                 hCost.setStroke(Color.BLACK);
                 hCost.setTextAlignment(TextAlignment.CENTER);
                 pane.getChildren().add(hCost);
@@ -221,12 +223,29 @@ public class Main extends Application{
                 //Setup fCost number in PathNode
                 Text fCost = new Text(String.valueOf(node.getfCost()));
                 fCost.setLayoutX(rectangle.getLayoutX() + rectangle.getWidth()/2 - 10);
-                fCost.setLayoutY(rectangle.getLayoutY() + rectangle.getHeight()/2);
-                fCost.setFont(new Font(16));
+                fCost.setLayoutY(rectangle.getLayoutY() + rectangle.getHeight()/2 + 10);
+                fCost.setFont(new Font(11));
                 fCost.setStroke(Color.BLACK);
                 fCost.setTextAlignment(TextAlignment.CENTER);
                 pane.getChildren().add(fCost);
                 ((PathNode) node).setTextFcost(fCost);
+            }else if(node instanceof StateNode && !node.isGenerated()){
+
+                String nameOfNode;
+                if(((StateNode) node).getName().equals("start")){
+                    nameOfNode = "A";
+                    System.out.println("uw");
+                }else{
+                    nameOfNode = "B";
+                }
+
+                Text name = new Text(nameOfNode);
+                name.setLayoutX(rectangle.getLayoutX() + rectangle.getWidth()/2-4);
+                name.setLayoutY(rectangle.getLayoutY() + rectangle.getHeight()/2 +10);
+                name.setFont(new Font(11));
+                name.setStroke(Color.BLACK);
+                name.setTextAlignment(TextAlignment.CENTER);
+                pane.getChildren().add(name);
             }
         }
         node.setGenerated(true);
@@ -412,7 +431,9 @@ public class Main extends Application{
         run.play();
     }
 
-
+    /**
+     * Restart the entire board and the nodes.
+     */
     public void restart(){
         hasStarted = false;
         if(run != null){
@@ -430,6 +451,9 @@ public class Main extends Application{
     }
 
 
+    /**
+     * Restart the path that have been colored.
+     */
     public void restartOnlyPath(){
         if(run != null){
             run.stop();
@@ -458,7 +482,11 @@ public class Main extends Application{
         updateGUI();
     }
 
-
+    /**
+     * Add a wall on the board
+     * @param x the position X of the wall
+     * @param y the position Y of the wall
+     */
     public void addWall(int x, int y){
         grid.addWall(x,y);
         updateGUI(x,y);
